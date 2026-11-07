@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: my-portfolio-web
+    runtime: docker
+    plan: free # Upgrade to 'starter' ($7/mo) to prevent cold-start spin-downs
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        sync: false # Paste your Neon pooled connection string here
+      - key: REDIS_URL
+        sync: false # Paste your Upstash rediss:// URL here
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
