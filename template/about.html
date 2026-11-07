@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — {{engineer.full_name}}</title>
+  <meta name="description" content="Learn more about {{engineer.full_name}}, a passionate software engineer with {{engineer.year_of_experience}}+ years of experience in backend web development." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+</head>
+<body>
+
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <ul class="nav-links">
+        <li><a href="{% url 'homepage' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'projects' %}">Projects</a></li>
+        <li><a href="{% url 'skills' %}">Skills</a></li>
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'blog' %}">blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><a href="{% url 'homepage' %}">Home</a> / About</div>
+      <h1>About Me</h1>
+      <p style="color: var(--text-muted);">Engineer, builder, and lifelong learner.</p>
+    </div>
+  </section>
+
+  <section style="padding-top: 24px;">
+    <div class="container about-grid">
+      <div class="reveal">
+        <div class="about-phot">
+          <img src="{{engineer.profile_pics.url}}" alt="Portrait of {{engineer.full_name}}" />
+        </div>
+        <ul class="info-list">
+          <li><span>Name</span><b>{{engineer.full_name}}</b></li>
+          <li><span>Location</span><b>{{contact.address}}</b></li>
+          <li><span>Experience</span><b>{{engineer.year_of_experience}}+</b></li>
+          <li><span>profession</span><b>{{engineer.profession}}</b></li>
+          <li><span>Email</span><b>{{contact.email}}</b></li>
+          <li><span>phone</span><b>{{contact.phone}}</b></li>
+        </ul>
+        <a href="{{engineer.resume.url}}" class="btn btn-primary btn-block" style="margin-top:24px;" download>⬇ Download Full Résumé</a>
+      </div>
+
+      <div>
+        <div class="reveal">
+          <div class="section-tag">WHO I AM</div>
+          <h2 style="font-size: 30px; margin: 0 0 16px;">{{about.heading}}</h2>
+          <p style="color: var(--text-muted); font-size: 16.5px;">
+           {{about.body}}
+          </p>
+          <p style="color: var(--text-muted); font-size: 16.5px;">
+          </p>
+        </div>
+
+        <div class="reveal" style="margin-top: 48px;">
+          <div class="tab-group">
+            <button class="tab-btn active" data-tab="experience" data-target="#about-tabs">Experience</button>
+            <button class="tab-btn" data-tab="education" data-target="#about-tabs">Education</button>
+            <button class="tab-btn" data-tab="values" data-target="#about-tabs">Values</button>
+          </div>
+
+          <div id="about-tabs">
+            <div class="tab-panel active" data-panel="experience">
+              <div class="timeline">
+                {% for job in experience %}
+                <div class="timeline-item">
+                  <span class="timeline-date">{{job.start_date}} — {{job.end_date}}</span>
+                  <h3>{{job.role}}</h3>
+                  <span class="org">{{job.company}}</span>
+                  <p style="color: var(--text-muted); margin:0;">{{job.role_description}}</p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="education">
+              <div class="timeline">
+                {% for education in education %}
+                <div class="timeline-item">
+                  <span class="timeline-date">{{education.start_date}} — {{education.end_date}}</span>
+                  <h3>{{education.certificate_title}}</h3>
+                  <span class="org">{{education.institution}}</span>
+                  <p style="color: var(--text-muted); margin:0;">{{education.certificate_description}}</p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="values">
+              <div class="grid-2">
+                {% for value in value %}
+                <div class="card">
+                  <h3>{{value.value_name}}</h3>
+                  <p style="color: var(--text-muted); margin:0;">{{value.value_description}}</p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <div class="social-links">
+        {% for social in contact.socials.all %}
+        <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+      </div>
+      <p class="footer-copy">© <span class="current-year"></span> {{engineer.full_name}}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

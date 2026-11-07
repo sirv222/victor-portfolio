@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ post.title }} — {{engineer.full_name}}</title>
+  <meta name="description" content="{{ post.excerpt|default:post.title }}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  {% if messages %}
+  <div id="django-messages" hidden>
+    {% for message in messages %}
+    <div data-message="{{ message|escape }}" data-tags="{{ message.tags }}"></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}">Home</a></li>
+        <li><a href="{% url 'blog' %}">Latest</a></li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'writer_dashboard' %}">Dashboard</a></li>
+        {% else %}
+          <li><a href="{% url 'register_writer' %}">Write with us</a></li>
+        {% endif %}
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        {% if user.is_authenticated %}
+          <a href="{% url 'writer_dashboard' %}" class="btn btn-outline small-btn">Dashboard</a>
+          <a href="{% url 'logout' %}" class="btn btn-primary small-btn">Logout</a>
+        {% else %}
+          <a href="{% url 'register_writer' %}" class="btn btn-primary small-btn">Become an Author</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <main class="container blog-post-shell">
+    <article class="blog-post-card reveal">
+      {% if post.cover_image %}
+        <img src="{{ post.cover_image.url }}" class="blog-post-cover" alt="{{ post.title }}" />
+      {% endif %}
+      <div class="blog-post-inner">
+        <div class="blog-post-meta">
+          <a href="{% url 'author_profile' username=post.author.username %}" class="author-link">
+            {{ post.author.get_full_name|default:post.author.username }}
+          </a>
+          <span>•</span>
+          <span>{{ post.publish_date|date:"M d, Y" }}</span>
+        </div>
+
+        <h1>{{ post.title }}</h1>
+        <div class="blog-post-actions">
+          <form class="reaction-form" method="post" action="{% url 'like_blog_post' slug=post.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="reaction" value="like" />
+            <button type="submit" class="reaction-btn {% if liked_by_user %}active{% endif %}" data-reaction="like">👍 <span class="reaction-count">{{ post.likes_count }}</span></button>
+          </form>
+          <form class="reaction-form" method="post" action="{% url 'dislike_blog_post' slug=post.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="reaction" value="dislike" />
+            <button type="submit" class="reaction-btn {% if disliked_by_user %}active{% endif %}" data-reaction="dislike">👎 <span class="reaction-count">{{ post.dislikes_count }}</span></button>
+          </form>
+          <span>💬 {{ post.comments_count }} comments</span>
+        </div>
+
+      <div class="blog-content">
+        {{ post.content|linebreaksbr }}
+      </div>
+    </article>
+
+    <aside class="comments-panel reveal">
+      <h3>Comments</h3>
+      <form method="post" action="{% url 'add_blog_comment' slug=post.slug %}" class="comment-form">
+        {% csrf_token %}
+        <textarea name="content" rows="4" placeholder="Share your thoughts..."></textarea>
+        <button type="submit" class="btn btn-primary">Post Comment</button>
+      </form>
+      {% if not user.is_authenticated %}
+        <p class="muted">Posting as a guest is available.</p>
+      {% endif %}
+
+      <div class="comment-list">
+        {% for comment in post.comments.all %}
+        <div class="comment-item">
+          <strong>{% if comment.user %}{{ comment.user.get_full_name|default:comment.user.username }}{% else %}Guest{% endif %}</strong>
+          <small>{{ comment.created_at|date:"M d, Y" }}</small>
+          <p>{{ comment.content }}</p>
+        </div>
+        {% empty %}
+        <p class="muted">No comments yet. Be the first to share your thoughts.</p>
+        {% endfor %}
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <p class="footer-copy">© <span class="current-year"></span> Ink &amp; Insight. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>

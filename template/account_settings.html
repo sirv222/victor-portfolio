@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}">Home</a></li>
+        <li><a href="{% url 'writer_dashboard' %}">Dashboard</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container auth-shell">
+    <section class="form-panel reveal settings-panel">
+      <div class="section-tag">PROFILE</div>
+      <h1>Account Settings</h1>
+
+      <form method="post" enctype="multipart/form-data" class="settings-form">
+        {% csrf_token %}
+        <div class="field-group">
+          <label for="{{ profile_form.bio.id_for_label }}">Bio</label>
+          {{ profile_form.bio }}
+          {% if profile_form.bio.errors %}<small class="error-text">{{ profile_form.bio.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <div class="field-group">
+          <label for="{{ profile_form.avatar.id_for_label }}">Profile image</label>
+          {{ profile_form.avatar }}
+          {% if profile_form.avatar.errors %}<small class="error-text">{{ profile_form.avatar.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save profile</button>
+      </form>
+    </section>
+
+    <section class="form-panel reveal settings-panel">
+      <div class="section-tag">SECURITY</div>
+      <h2>Change password</h2>
+      <form method="post" class="settings-form">
+        {% csrf_token %}
+        <div class="field-group">
+          <label for="{{ password_form.old_password.id_for_label }}">Current password</label>
+          {{ password_form.old_password }}
+          {% if password_form.old_password.errors %}<small class="error-text">{{ password_form.old_password.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <div class="field-group">
+          <label for="{{ password_form.new_password1.id_for_label }}">New password</label>
+          {{ password_form.new_password1 }}
+          {% if password_form.new_password1.errors %}<small class="error-text">{{ password_form.new_password1.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <div class="field-group">
+          <label for="{{ password_form.new_password2.id_for_label }}">Confirm new password</label>
+          {{ password_form.new_password2 }}
+          {% if password_form.new_password2.errors %}<small class="error-text">{{ password_form.new_password2.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Update password</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>

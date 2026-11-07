@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Author Login</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}">Home</a></li>
+        <li><a href="{% url 'register_writer' %}">Join</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  {% if messages %}
+  <div id="django-messages" hidden>
+    {% for message in messages %}
+    <div data-message="{{ message|escape }}" data-tags="{{ message.tags }}"></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="container auth-shell">
+    <section class="form-panel reveal">
+      <div class="section-tag">ACCESS</div>
+      <h1>Author Login</h1>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.website }}
+        {{ form.captcha_token }}
+        {% if form.non_field_errors %}
+          <div class="error-box">{{ form.non_field_errors|join:', ' }}</div>
+        {% endif %}
+        {% if messages %}
+          <div class="error-box">
+            {% for message in messages %}
+              {{ message }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="field-group">
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}<small class="error-text">{{ form.username.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <div class="field-group">
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}<small class="error-text">{{ form.password.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <div class="field-group">
+          <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+          {% if form.captcha_token.errors %}<small class="error-text">{{ form.captcha_token.errors|join:', ' }}</small>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+      </form>
+      <p class="muted" style="margin-top: 20px;">Need an account? <a href="{% url 'register_writer' %}">Register as an author</a>.</p>
+      <p class="muted" style="margin-top: 12px;"><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+    </section>
+  </main>
+
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>

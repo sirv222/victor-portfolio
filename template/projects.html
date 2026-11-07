@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects — {{engineer.full_name}}</title>
+  <meta name="description" content="A showcase of software engineering projects by {{engineer.full_name}}, including web apps, mobile apps, and data platforms." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+</head>
+<body>
+
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.full_name}}<span>.dev</span>/&gt;</a>
+      <ul class="nav-links">
+        <li><a href="{% url 'homepage' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'projects' %}">Projects</a></li>
+        <li><a href="{% url 'skills' %}">Skills</a></li>
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'blog' %}">blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><a href="{% url 'homepage' %}">Home</a> / Projects</div>
+      <h1>My Projects</h1>
+      <p style="color: var(--text-muted);">A collection of products I've designed, built, and shipped.</p>
+    </div>
+  </section>
+
+  <section style="padding-top: 24px;">
+    <div class="container">
+      <div class="filter-bar">
+        <button class="tab-btn active" data-filter="all">All</button>
+        <button class="tab-btn" data-filter="web">Web Apps</button>
+        <button class="tab-btn" data-filter="mobile">Mobile</button>
+        <button class="tab-btn" data-filter="data">Data &amp; AI</button>
+        <button class="tab-btn" data-filter="oss">Open Source</button>
+      </div>
+
+      <div class="grid-3">
+        {% for project in project %}
+        <div class="project-card reveal" data-category="{% for category in project.project_category.all %} {{category.choice}} {% endfor %}">
+          <div class="project-thumb"><img src="{{project.project_visual.url}}" alt="{{project.project_title}}" /></div>
+          <div class="project-body">
+            <div class="project-tags">{% for tech in project.project_stack.all %}<span>{{tech.name}}</span>{% endfor %}</div>
+            <h3>{{project.project_title}}</h3>
+            <p>{{project.project_description}}</p>
+            <div class="project-links">
+              <a href="{{project.project_url}}" onclick="return false;">🔗 Live Demo</a>
+              <a href="{{project.project_code}}" onclick="return false;">⚡ Source Code</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section> 
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <div class="social-links">
+        {% for social in contact.socials.all %}
+        <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+      </div>
+      <p class="footer-copy">© <span class="current-year"></span> {{engineer.full_name}}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <script src="{% static 'script.js' %}"></script> 
+</body>
+</html>

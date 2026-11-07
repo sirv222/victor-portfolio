@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{engineer.full_name}} — {{engineer.profession}}</title>
+  <meta name="description" content="{{about.heading}}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <ul class="nav-links">
+        <li><a href="{% url 'homepage' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'projects' %}">Projects</a></li>
+        <li><a href="{% url 'skills' %}">Skills</a></li>
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'blog' %}">blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero --> 
+  <section class="hero">
+    <div class="hero-bg" style="background-image: url('');"></div>
+    <div class="container hero-inner">
+      <div>
+        {% if contact.availability == 'AVAILABLE' %}
+        <div class="hero-eyebrow"><span class="dot"></span> Available for new opportunities</div>
+        {% else %}
+        <div class="hero-eyebrow"><span class="dot"></span> So sorry am busy right now</div>
+        {% endif %}
+        <h1>
+          Hi, I'm <span class="gradient-text">{{engineer.full_name}}</span><br />
+          I Am A <span id="typed-role"></span><span class="cursor">&nbsp;</span>
+        </h1>
+        <p class="lead">
+          A software engineer with {{engineer.year_of_experience}} years of experience turning complex problems into
+          elegant, scalable products. I specialize in 
+          {% for skill in tech_stack|slice:"5" %}
+          {{skill.name}},
+          {% endfor %}
+        </p>
+        <div class="hero-cta">
+          <a href="{% url 'projects' %}" class="btn btn-primary">View My Work →</a>
+          <a href="{{engineeer.resume.url}}" class="btn btn-outline" download>⬇ Download Résumé</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong><span data-counter="{{engineer.year_of_experience}}" data-suffix="+">0</span></strong><span>Years Experience</span></div>
+          <div><strong><span data-counter="{{no_of_project}}" data-suffix="">0</span></strong><span>Projects Shipped</span></div>
+          <div><strong><span data-counter="{{engineer.clients}}" data-suffix="">0</span></strong><span>Happy Clients</span></div>
+          <div><strong><span data-counter="{{no_of_oss_projects}}" data-suffix="">0</span></strong><span>OSS Contributions</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="code-window">
+          <div class="code-window-head"><span></span><span></span><span></span></div>
+          <pre><span class="tok-com"># engineer.py</span>
+<span class="tok-key">def</span> <span class="tok-var">{{engineer.first_name}}():</span>
+  return {
+    <span class="tok-var">'role'</span>: <span class="tok-str">'{{engineer.profession}}'</span>,
+    <span class="tok-var">'stack'</span>: [{% for skill in tech_stack|slice:"3" %}<span class="tok-str">'{{skill.name}}'</span>,{% endfor %} ],
+    <span class="tok-var">'loves'</span>: [<span class="tok-str">'clean code'</span>, <span class="tok-str">'tea'</span>],
+    <span class="tok-fn">'isHiring'</span>: {% if contact.availability == 'AVAILABLE'  %} <span class="tok-key">True,</span>{% else %}<span class="tok-key">false</span>, {% endif %}
+  },
+
+<span class="tok-fn">build</span>(<span class="tok-var">{{engineer.first_name}}</span>.<span class="tok-var">stack</span>)
+  .<span class="tok-fn">then</span>(<span class="tok-var">ship</span> => <span class="tok-fn">console</span>.<span class="tok-fn">log</span>(
+    <span class="tok-str">'🚀 shipped!'</span>
+  ));</pre>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="mouse"></div>
+      SCROLL
+    </div>
+  </section> 
+
+  <!-- What I Do -->
+  <section>
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag">WHAT I DO</div>
+        <h2>Turning ideas into reliable software</h2>
+        <p>I focus on the backend lifecycle of a product — from architecture and design to deployment and scaling.</p>
+      </div>
+      <div class="grid-3">
+        {% for skill in skill|slice:"3" %}
+        <div class="card reveal">
+          <div style="font-size: 36px; margin-bottom: 16px;">{{skill.visual_rep}}</div>
+          <h3>{{skill.name}}</h3>
+          <p style="color: var(--text-muted);">{{skill.description}}</p>
+          <div class="project-tags">{% for tech in skill.skill_stack.all %}<span>{{tech.name}}</span>{% endfor %}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Projects -->
+  <section style="background: var(--bg-alt);">
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag">FEATURED WORK</div>
+        <h2>A few things I've built</h2>
+        <p>A snapshot of recent projects. Visit the Projects page for the full, filterable archive.</p>
+      </div>
+      <div class="grid-3">
+        {% for project in recent_project|slice:"3" %}
+        <div class="project-card reveal">
+          <div class="project-thumb"><img src="{{project.project_visual.url}}" alt="Commerce analytics dashboard" /></div>
+          <div class="project-body">
+            <div class="project-tags">{% for tech in project.project_stack.all %}<span>{{tech.name}}</span>{% endfor %}</div>
+            <h3>{{project.project_title}}</h3>
+            <p>{{project.project_description}}</p>
+            <div class="project-links"><a href="{{projects.project_url}}">View case study →</a></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div style="text-align:center; margin-top: 48px;">
+        <a href="{% url 'projects' %}" class="btn btn-primary">See All Projects</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  {% if contact.availability == 'AVAILABLE' %}
+  <section>
+    <div class="container">
+      <div class="card reveal" style="text-align:center; padding: 64px 32px; background: var(--accent-gradient); border: none;">
+        <h2 style="color:#fff; margin: 0 0 14px; font-size: clamp(24px, 4vw, 34px);">Have a project in mind?</h2>
+        <p style="color: rgba(255,255,255,0.9); max-width: 520px; margin: 0 auto 28px;">
+          I'm currently open to freelance work and full-time roles. Let's build something great together.
+        </p>
+        <a href="{% url 'contact' %}" class="btn" style="background:#fff; color:#161a23;">Get in Touch</a>
+      </div>
+    </div>
+  </section>
+  {% else %}
+  {% endif %}
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <div class="social-links">
+        {% for social in contact.socials.all %}
+        <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+      </div>
+      <p class="footer-copy">© <span class="current-year"></span> {{engineer.full_name}}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <script src="{% static 'script.js' %}"></script> 
+</body>
+</html>

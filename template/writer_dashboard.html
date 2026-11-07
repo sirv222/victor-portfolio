@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Author Dashboard — {{ user.get_full_name|default:user.username }}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}">Home</a></li>
+        <li><a href="{% url 'writer_dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'create_blog_post' %}">New Post</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <a href="{% url 'create_blog_post' %}" class="btn btn-primary small-btn">New Post</a>
+        <a href="{% url 'logout' %}" class="btn btn-outline small-btn">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container dashboard-shell">
+    <section class="dashboard-header reveal">
+      <div class="profile-summary">
+        <div class="profile-avatar-wrap">
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }} avatar" class="profile-avatar" />
+          {% else %}
+            <div class="profile-avatar profile-avatar-fallback">
+              {{ user.get_full_name|default:user.username|slice:':1'|upper }}
+            </div>
+          {% endif %}
+        </div>
+        <div>
+          <div class="section-tag">AUTHOR DASHBOARD</div>
+          <h1>{{ user.get_full_name|default:user.username }}</h1>
+          {% if profile.bio %}
+            <p class="profile-bio">{{ profile.bio }}</p>
+          {% else %}
+            <p class="profile-bio muted">Add a short bio in your account settings so readers know who you are.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'account_settings' %}" class="btn btn-outline">Account Settings</a>
+      </div>
+    </section>
+
+    <section class="stats-grid reveal">
+      <div class="stat-box">
+        <strong>{{ posts.count }}</strong>
+        <span>Total Posts</span>
+      </div>
+      <div class="stat-box">
+        <strong>{{ user.blog_posts.all|length }}</strong>
+        <span>Published</span>
+      </div>
+      <div class="stat-box">
+        <strong>{{ user.blog_comments.count }}</strong>
+        <span>Comments</span>
+      </div>
+      <div class="stat-box">
+        <strong>{{ user.blog_reactions.count }}</strong>
+        <span>Reactions</span>
+      </div>
+    </section>
+
+    <section class="writer-posts reveal">
+      <h2>Your Posts</h2>
+      <div class="post-list">
+        {% for post in posts %}
+        <div class="writer-post-item">
+          <div>
+            <h3><a href="{% url 'blog_post_detail' slug=post.slug %}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt|default:post.content|truncatewords:18 }}</p>
+            <div class="blog-actions compact">
+              <span>👍 {{ post.likes_count }}</span>
+              <span>👎 {{ post.dislikes_count }}</span>
+              <span>💬 {{ post.comments_count }}</span>
+            </div>
+          </div>
+          <span class="post-status {{ post.status }}">{{ post.status }}</span>
+        </div>
+        {% empty %}
+        <p class="muted">You have not created any posts yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <div class="social-links">
+        {% for social in contact.socials.all %}
+        <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+      </div>
+      <p class="footer-copy">© <span class="current-year"></span> Ink &amp; Insight. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>

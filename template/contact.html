@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — {{engineer.full_name}}</title>
+  <meta name="description" content="Get in touch with {{engineer.full_name}} for freelance work, full-time opportunities, or collaboration." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <ul class="nav-links">
+        <li><a href="{% url 'homepage' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'projects' %}">Projects</a></li>
+        <li><a href="{% url 'skills' %}">Skills</a></li>
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'blog' %}">blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><a href="{% url 'homepage' %}">Home</a> / Contact</div>
+      <h1>Let's Work Together</h1>
+      <p style="color: var(--text-muted);">Have a question or a project in mind? I'd love to hear from you.</p>
+    </div>
+  </section>
+
+  <section style="padding-top: 24px;">
+    <div class="container contact-grid">
+      <div class="reveal">
+        <div class="contact-info-card">
+          <div class="contact-info-row">
+            <div class="icon">📍</div>
+            <div><h4>Location</h4><p>{{contact.address}}</p></div>
+          </div>
+          <div class="contact-info-row">
+            <div class="icon">✉️</div>
+            <div><h4>Email</h4><p>{{contact.email}}</p></div>
+          </div>
+          <div class="contact-info-row">
+            <div class="icon">📞</div>
+            <div><h4>Phone</h4><p>{{contact.phone}}</p></div>
+          </div>
+          <div class="contact-info-row">
+            <div class="icon">💼</div>
+            <div><h4>Availability</h4><p>{{contact.availability}}</p></div>
+          </div>
+        </div>
+
+        <div class="social-links" style="margin-top: 8px;">
+        {% for social in contact.socials.all %}
+          <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+        </div>
+
+        <div class="map-embed">
+          <span style="font-size: 28px;">🗺️</span>
+          <span>Nigera Delta State<br /></span>
+        </div>
+      </div>
+
+      {% if messages %}
+      <div id="django-messages" hidden>
+        {% for message in messages %}
+        <div data-message="{{message|escape}}" data-tags="{{message.tags}}"></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      <div class="reveal">
+        <div class="form-card">
+          <h2 style="margin-top:0;">Send a Message</h2>
+          <p style="color: var(--text-muted); margin-top:-8px;">
+            Have a project in mind or looking for a python developer to bring your ideas to life?🤔 I`d love to hear from you.
+          </p>
+          <form id="contact-form" method="post" action="{% url 'contact' %}">
+            {% csrf_token %}
+            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Full Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                  <span class="error-msg">{{ form.name.errors|join:', ' }}</span>
+                {% else %}
+                  <span class="error-msg">Please enter your full name.</span>
+                {% endif %}
+              </div>
+              <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                  <span class="error-msg">{{ form.email.errors|join:', ' }}</span>
+                {% else %}
+                  <span class="error-msg">Please enter a valid email address.</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="honeypot">
+              <label for="website">leave this field empty</label>
+              <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="{{ form.subject.id_for_label }}">Subject</label>
+              {{ form.subject }}
+              {% if form.subject.errors %}
+                <span class="error-msg">{{ form.subject.errors|join:', ' }}</span>
+              {% else %}
+                <span class="error-msg">Please enter a subject.</span>
+              {% endif %}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.message.id_for_label }}">Message</label>
+              {{ form.message }}
+              {% if form.message.errors %}
+                <span class="error-msg">{{ form.message.errors|join:', ' }}</span>
+              {% else %}
+                <span class="error-msg">Message should be at least 10 characters.</span>
+              {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="send-btn">
+              <span id="btn-text">Send Message →</span>
+              <span id="loader" class="loader" hidden></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag">FAQ</div>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="grid-2">
+        {% for question in question %}
+        <div class="card reveal">
+          <h3>{{question.question}}?</h3>
+          <p style="color: var(--text-muted);">{{question.answer}}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <div class="social-links">
+        {% for social in contact.socials.all %}
+        <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+      </div>
+      <p class="footer-copy">© <span class="current-year"></span> {{engineer.full_name}}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <script src="{% static 'script.js' %}"></script>
+  
+</body>
+</html>
+

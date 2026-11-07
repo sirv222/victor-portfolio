@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Post — Author Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}">Home</a></li>
+        <li><a href="{% url 'writer_dashboard' %}">Dashboard</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container auth-shell">
+    <section class="form-panel reveal">
+      <div class="section-tag">NEW ARTICLE</div>
+      <h1>Write a Blog Post</h1>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="field-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" placeholder="Post title" required>
+        </div>
+        <div class="field-group">
+          <label for="excerpt">Excerpt</label>
+          <textarea id="excerpt" name="excerpt" rows="3" placeholder="Short summary..."></textarea>
+        </div>
+        <div class="field-group">
+          <label for="content">Content</label>
+          <textarea id="content" name="content" rows="12" placeholder="Write your article here..." required></textarea>
+        </div>
+        <div class="field-group">
+          <label for="cover_image">Cover image</label>
+          <input type="file" id="cover_image" name="cover_image" accept="image/*">
+        </div>
+        <div class="field-group">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option value="draft">Draft</option>
+            <option value="published">Publish immediately</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Post</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>

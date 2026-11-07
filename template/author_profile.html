@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ author.get_full_name|default:author.username }} — Author Profile</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}">Home</a></li>
+        <li><a href="{% url 'blog' %}">Latest</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        {% if user.is_authenticated %}
+          <a href="{% url 'writer_dashboard' %}" class="btn btn-outline small-btn">Dashboard</a>
+          <a href="{% url 'logout' %}" class="btn btn-primary small-btn">Logout</a>
+        {% else %}
+          <a href="{% url 'register_writer' %}" class="btn btn-primary small-btn">Become an Author</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <main class="container blog-layout" style="padding-top: 48px;">
+    <section class="blog-post-card reveal" style="grid-column: 1 / -1;">
+      <div class="profile-summary">
+        <div class="profile-avatar-wrap">
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ author.get_full_name|default:author.username }}" class="profile-avatar" />
+          {% else %}
+            <div class="profile-avatar-fallback">{{ author.get_full_name|first|default:author.username|upper }}</div>
+          {% endif %}
+        </div>
+
+        <div>
+          <div class="section-tag">Author</div>
+          <h1 style="margin: 14px 0 8px;">{{ author.get_full_name|default:author.username }}</h1>
+          <p class="muted">@{{ author.username }}</p>
+        </div>
+      </div>
+
+      <p class="profile-bio">
+        {% if profile.bio %}
+          {{ profile.bio }}
+        {% else %}
+          This writer shares thoughtful perspectives on product, design, and engineering.
+        {% endif %}
+      </p>
+
+      <div class="author-stats">
+        <div class="stat-box author-stat-box">
+          <span>Likes received</span>
+          <strong>{{ likes_total }}</strong>
+        </div>
+        <div class="stat-box author-stat-box">
+          <span>Dislikes received</span>
+          <strong>{{ dislikes_total }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-search-panel reveal" style="grid-column: 1 / -1;">
+      <form method="get" action="" class="profile-search">
+        <input type="search" name="q" value="{{ search_query }}" placeholder="Search this author's posts..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </section>
+
+    <section class="blog-list reveal" style="grid-column: 1 / -1;">
+      {% for post in posts %}
+        <article class="blog-card reveal">
+          {% if post.cover_image %}
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="blog-cover" />
+          {% endif %}
+
+          <div class="blog-body">
+            <div class="blog-meta">
+              <span>{{ author.get_full_name|default:author.username }}</span>
+              <span>•</span>
+              <span>{{ post.publish_date|date:"M d, Y" }}</span>
+            </div>
+
+            <h2><a href="{% url 'blog_post_detail' slug=post.slug %}">{{ post.title }}</a></h2>
+            <p>{{ post.excerpt|default:post.content|truncatewords:28 }}</p>
+
+            <div class="blog-actions" style="margin-top: 18px;">
+              <a href="{% url 'blog_post_detail' slug=post.slug %}" class="btn btn-primary">Read article</a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state reveal" style="grid-column: 1 / -1;">
+          <h2>No posts yet</h2>
+          <p>{% if search_query %}No posts match your search for "{{ search_query }}".{% else %}This author has not published any articles yet.{% endif %}</p>
+        </div>
+      {% endfor %}
+    </section>
+
+    {% if posts.paginator.num_pages > 1 %}
+      <div class="pagination reveal" aria-label="Author profile pagination" style="grid-column: 1 / -1;">
+        <div class="pagination-summary">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</div>
+        <div class="pagination-links">
+          {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="pagination-btn">Previous</a>
+          {% else %}
+            <span class="pagination-btn disabled">Previous</span>
+          {% endif %}
+
+          {% for page_num in posts.paginator.page_range %}
+            {% if page_num == posts.number %}
+              <span class="pagination-btn active">{{ page_num }}</span>
+            {% else %}
+              <a href="?page={{ page_num }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="pagination-btn">{{ page_num }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="pagination-btn">Next</a>
+          {% else %}
+            <span class="pagination-btn disabled">Next</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </main>
+
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>

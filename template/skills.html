@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skills — {{engineer.full_name}}</title>
+  <meta name="description" content="Technical skills and tools used by {{engineer.full_name}}, a {{engineer.profession}}." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+</head>
+<body>
+
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <ul class="nav-links">
+        <li><a href="{% url 'homepage' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'projects' %}">Projects</a></li>
+        <li><a href="{% url 'skills' %}">Skills</a></li>
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'blog' %}">blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><a href="{% url 'homepage' %}">Home</a> / Skills</div>
+      <h1>Skills &amp; Expertise</h1>
+      <p style="color: var(--text-muted);">Technologies and tools I use to bring products to life.</p>
+    </div>
+  </section>
+
+  <section style="padding-top: 24px;">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-tag">PROFICIENCY</div>
+        <h2>Core Competencies</h2>
+      </div>
+      <div class="skills-grid">
+        {% for skill in skill %}
+        <div class="skill-card reveal">
+          <div style="font-size: 36px; margin-bottom: 16px;">{{skill.visual_rep}}</div>
+          <h3 style="margin-top:0;">{{skill.name}}</h3>
+          {% for tech in skill.skill_stack.all %}
+          <div class="skill-row">
+            <div class="skill-row-head"><span>{{tech.name}}</span><span>{{tech.knowledge_percent}}%</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" data-level="{{tech.knowledge_percent}}"></div></div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg-alt);">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-tag">TOOLBOX</div>
+        <h2>Technologies I work with</h2>
+      </div>
+      <div class="badges reveal">
+        {% for tech in tech_stack %}
+        <span class="badge">{{tech.logo}}{{tech.name}}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag">CERTIFICATIONS</div>
+        <h2>Licenses &amp; Certifications</h2>
+      </div>
+      <div class="grid-3">
+        {% for certificate in education %}
+        <div class="card reveal">
+          <div style="font-size:32px;">🏅</div>
+          <h3>{{certificate.certificate_title}}</h3>
+          <p style="color:var(--text-muted);">{{certificate.institution}} — {{certificate.end_date}}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+   <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'homepage' %}" class="logo">&lt;{{engineer.first_name}}<span>.dev</span>/&gt;</a>
+      <div class="social-links">
+        {% for social in contact.socials.all %}
+        <a href="{{social.link}}" target="_blank" rel="noopener" aria-label="{{social.name}}">{{social.logo}}</a>
+        {% endfor %}
+      </div>
+      <p class="footer-copy">© <span class="current-year"></span> {{engineer.full_name}}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <script src="{% static 'script.js' %}"></script> 
+</body>
+</html>

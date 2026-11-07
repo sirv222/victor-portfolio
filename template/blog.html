@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — {{ engineer.full_name }}</title>
+  <meta name="description" content="Read published blog posts and articles from the portfolio site." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'blog.css' %}" />
+</head>
+<body>
+  {% if messages %}
+  <div id="django-messages" hidden>
+    {% for message in messages %}
+    <div data-message="{{ message|escape }}" data-tags="{{ message.tags }}"></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <header class="navbar">
+    <nav class="nav-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <ul class="nav-links">
+        <li><a href="{% url 'blog' %}" class="active">Home</a></li>
+        <li><a href="{% url 'blog' %}">Latest</a></li>
+        <li class="nav-dropdown">
+          <button type="button" class="category-trigger">Categories</button>
+          <div class="dropdown-menu">
+            <a href="{% url 'blog' %}">All</a>
+            <a href="{% url 'blog' %}?q=design">Design</a>
+            <a href="{% url 'blog' %}?q=development">Development</a>
+            <a href="{% url 'blog' %}?q=creative">Creative</a>
+            <a href="{% url 'blog' %}?q=insights">Insights</a>
+          </div>
+        </li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'writer_dashboard' %}">Dashboard</a></li>
+        {% endif %}
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        {% if user.is_authenticated %}
+          <a href="{% url 'writer_dashboard' %}" class="btn btn-outline small-btn">Dashboard</a>
+          <a href="{% url 'logout' %}" class="btn btn-primary small-btn">Logout</a>
+        {% else %}
+          <a href="{% url 'register_writer' %}" class="btn btn-primary small-btn">Become an Author</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <div class="container blog-header reveal">
+      <div class="breadcrumb">
+        <a href="{% url 'homepage' %}" class="breadcrumb-button">In need of a software engineer</a>
+        <span>/</span>
+        <span>Blogging</span>
+      </div>
+      <h1>Blogging stories, ideas & insights</h1>
+      <p class="muted">Explore practical tips, thoughtful notes, and creative ideas from the writing desk.</p>
+
+      <form method="get" action="{% url 'blog' %}" class="blog-search" aria-label="Search blog posts">
+        <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search posts, topics, or keywords..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+
+      <form method="get" action="{% url 'blog' %}" class="blog-category-menu" aria-label="Filter blog posts by category">
+        <label for="blog-category-select" class="sr-only">Choose a category</label>
+        <select id="blog-category-select" name="q" onchange="this.form.submit()">
+          <option value="" {% if not request.GET.q %}selected{% endif %}>All categories</option>
+          <option value="design" {% if request.GET.q == 'design' %}selected{% endif %}>Design</option>
+          <option value="development" {% if request.GET.q == 'development' %}selected{% endif %}>Development</option>
+          <option value="creative" {% if request.GET.q == 'creative' %}selected{% endif %}>Creative</option>
+          <option value="insights" {% if request.GET.q == 'insights' %}selected{% endif %}>Insights</option>
+        </select>
+      </form>
+    </div>
+  </section>
+
+  <main class="container blog-layout">
+    <section class="blog-list reveal">
+      {% for post in posts %}
+        <article class="blog-card reveal">
+          {% if post.cover_image %}
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="blog-cover" />
+          {% endif %}
+
+          <div class="blog-body">
+            <div class="blog-meta">
+              <span>{{ post.author.get_full_name|default:post.author.username }}</span>
+              <span>•</span>
+              <span>{{ post.publish_date|date:"M d, Y" }}</span>
+            </div>
+
+            <h2><a href="{% url 'blog_post_detail' slug=post.slug %}">{{ post.title }}</a></h2>
+            <p>{{ post.excerpt|default:post.content|truncatewords:28 }}</p>
+
+            <div class="blog-actions">
+              <span>👍 {{ post.likes_count }}</span>
+              <span>👎 {{ post.dislikes_count }}</span>
+              <span>💬 {{ post.comments_count }}</span>
+            </div>
+
+            <div class="blog-actions" style="margin-top: 18px;">
+              <a href="{% url 'blog_post_detail' slug=post.slug %}" class="btn btn-primary">Read more</a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state reveal">
+          <h2>No published posts yet</h2>
+          <p>New blog posts will appear here once they are published.</p>
+        </div>
+      {% endfor %}
+    </section>
+
+    {% if posts.paginator.num_pages > 1 %}
+      <div class="pagination reveal" aria-label="Blog pagination">
+        <div class="pagination-summary">
+          Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+        </div>
+        <div class="pagination-links">
+          {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}" class="pagination-btn">Previous</a>
+          {% else %}
+            <span class="pagination-btn disabled">Previous</span>
+          {% endif %}
+
+          {% for page_num in posts.paginator.page_range %}
+            {% if page_num == posts.number %}
+              <span class="pagination-btn active">{{ page_num }}</span>
+            {% else %}
+              <a href="?page={{ page_num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}" class="pagination-btn">{{ page_num }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}" class="pagination-btn">Next</a>
+          {% else %}
+            <span class="pagination-btn disabled">Next</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <aside class="sidebar reveal">
+      <div class="sidebar-card">
+        <h3>Latest updates</h3>
+        <p class="muted">Read practical articles, case studies, and technical notes.</p>
+        <div class="stacked-links">
+          {% for post in posts|slice:':4' %}
+            <a href="{% url 'blog_post_detail' slug=post.slug %}">{{ post.title }}</a>
+          {% empty %}
+            <span class="muted">No articles available yet.</span>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <p class="footer-copy">© <span class="current-year"></span> Ink &amp; Insight. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+  <script src="{% static 'blog.js' %}"></script>
+</body>
+</html>
