@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -187,6 +188,17 @@ DATABASES = {
     }
 }
 
+DATABASE_URL = get_env('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -249,6 +261,11 @@ EMAIL_HOST_USER = get_env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER or 'webmaster@localhost'
 CONTACT_EMAIL = get_env('CONTACT_EMAIL', 'victoreruwa@gmail.com')
+
+REDIS_URL = get_env(
+    'REDIS_URL',
+    'redis://127.0.0.1:6379/1'
+)
 
 CACHES = {
     'default': {
