@@ -39,7 +39,9 @@ if not SECRET_KEY:
     raise ValueError("SECRET_KEY is not configured.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env('DEBUG', 'False').strip().lower() in {'0', 'false', 'no', 'off'}
+DEBUG = get_env('DEBUG', 'False').strip().lower() in {
+    '1', 'true', 'yes', 'on'
+}
 
 if DEBUG:
     # Local development
@@ -90,7 +92,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'cloudinary_storage',
     'cloudinary',
     'sitecore',
@@ -138,7 +140,6 @@ STORAGES = {
 
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'same-origin'
