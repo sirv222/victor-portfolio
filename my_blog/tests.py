@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
+from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
@@ -203,6 +204,36 @@ class AuthSecurityServiceTests(TestCase):
 
         self.assertFalse(result['ok'])
         self.assertFalse(get_user_model().objects.filter(username='undeliverable_writer').exists())
+
+
+class WriterDashboardTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='dashboard_writer', password='secret123')
+        self.posts = [
+            Blog.objects.create(
+                title=f'Dashboard Post {index}',
+                content='This post has enough content for the dashboard test.',
+                author=self.user,
+                status='published',
+            )
+            for index in range(7)
+        ]
+        like_user = get_user_model().objects.create_user(username='like_reader', password='secret123')
+        dislike_user = get_user_model().objects.create_user(username='dislike_reader', password='secret123')
+        BlogReaction.objects.create(post=self.posts[0], user=like_user, reaction='like')
+        BlogReaction.objects.create(post=self.posts[0], user=dislike_user, reaction='dislike')
+        self.client.force_login(self.user)
+
+    def test_dashboard_paginates_posts_and_shows_received_reactions(self):
+        response = self.client.get(reverse('writer_dashboard'), {'page': 2})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['posts'].number, 2)
+        self.assertEqual(len(response.context['posts']), 1)
+        self.assertEqual(response.context['posts_total'], 7)
+        self.assertEqual(response.context['published_posts_total'], 7)
+        self.assertEqual(response.context['likes_total'], 1)
+        self.assertEqual(response.context['dislikes_total'], 1)
 
 
 class PasswordResetServiceTests(TestCase):

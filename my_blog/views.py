@@ -34,7 +34,7 @@ def blog(request):
     try:
         search_query = request.GET.get('q', '')
         posts = BlogService.get_public_posts(search_query)
-        latest_post = BlogService.get_latest_posts()
+        latest_post = BlogService.get_latest_posts(posts=posts)
         paginator = Paginator(posts, 9)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -132,9 +132,14 @@ def writer_dashboard(request):
     try:
         profile, _ = WriterProfile.objects.get_or_create(user=request.user)
         posts = BlogService.get_user_posts(request.user)
+        page_obj = Paginator(posts, 6).get_page(request.GET.get('page'))
+        reaction_totals = BlogService.get_author_reaction_totals(request.user)
         context = portfolio_data(request)
         context['profile'] = profile
-        context['posts'] = posts
+        context['posts'] = page_obj
+        context['posts_total'] = posts.count()
+        context['published_posts_total'] = posts.filter(status='published').count()
+        context.update(reaction_totals)
         return render(request, 'writer_dashboard.html', context)
     except Exception:
         logger.exception('User dashboard error for user=%s', getattr(request.user, 'id', None))

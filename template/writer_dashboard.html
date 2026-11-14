@@ -22,7 +22,7 @@
       <div class="nav-actions">
         <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
         <a href="{% url 'create_blog_post' %}" class="btn btn-primary small-btn">New Post</a>
-        <form method="post" action="{% url 'logout' %}">
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline small-btn">Logout</button>
         </form>
@@ -59,21 +59,22 @@
 
     <section class="stats-grid reveal">
       <div class="stat-box">
-        <strong>{{ posts.count }}</strong>
+        <strong>{{ posts_total }}</strong>
         <span>Total Posts</span>
       </div>
       <div class="stat-box">
-        <strong>{{ user.blog_posts.all|length }}</strong>
+        <strong>{{ published_posts_total }}</strong>
         <span>Published</span>
       </div>
       <div class="stat-box">
-        <strong>{{ user.blog_comments.count }}</strong>
-        <span>Comments</span>
+        <strong>{{ likes_total }}</strong>
+        <span>Likes Received</span>
       </div>
       <div class="stat-box">
-        <strong>{{ user.blog_reactions.count }}</strong>
-        <span>Reactions</span>
+        <strong>{{ dislikes_total }}</strong>
+        <span>Dislikes Received</span>
       </div>
+
     </section>
 
     <section class="writer-posts reveal">
@@ -81,7 +82,10 @@
       <div class="post-list">
         {% for post in posts %}
         <div class="writer-post-item">
-          <div>
+          {% if post.cover_image %}
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="writer-post-cover" />
+          {% endif %}
+          <div class="writer-post-body">
             <h3><a href="{% url 'blog_post_detail' slug=post.slug %}">{{ post.title }}</a></h3>
             <p>{{ post.excerpt|default:post.content|truncatewords:18 }}</p>
             <div class="blog-actions compact">
@@ -96,7 +100,37 @@
         <p class="muted">You have not created any posts yet.</p>
         {% endfor %}
       </div>
+
     </section>
+
+    {% if posts.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Your posts pagination">
+      <div class="pagination-summary">
+        Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+      </div>
+      <div class="pagination-links">
+        {% if posts.has_previous %}
+          <a href="?page={{ posts.previous_page_number }}" class="pagination-btn">Previous</a>
+        {% else %}
+          <span class="pagination-btn disabled">Previous</span>
+        {% endif %}
+
+        {% for page_num in posts.paginator.page_range %}
+          {% if page_num == posts.number %}
+            <span class="pagination-btn active">{{ page_num }}</span>
+          {% else %}
+            <a href="?page={{ page_num }}" class="pagination-btn">{{ page_num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if posts.has_next %}
+          <a href="?page={{ posts.next_page_number }}" class="pagination-btn">Next</a>
+        {% else %}
+          <span class="pagination-btn disabled">Next</span>
+        {% endif %}
+      </div>
+    </nav>
+    {% endif %}
   </main>
 
   <footer>

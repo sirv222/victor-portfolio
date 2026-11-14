@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 import re
 import time
@@ -11,8 +12,9 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
@@ -258,13 +260,23 @@ class BlogService:
         ).distinct()
 
     @staticmethod
-    def get_latest_posts(limit=4):
-        from .models import Blog
+    def get_latest_posts(limit=6, posts=''):
+        timeframe = timezone.now() - timedelta(hours=24)
+        post_in_24h = posts.filter(
+            Q(publish_date__gte=timeframe)|Q(updated_at__gte=timeframe)
+            )
+        latest_6_post =posts.filter(status='published').order_by('publish_date', 'created_at')[:limit]
+        latest_post = ( post_in_24h & latest_6_post).distinct()
 
-        return (
-            Blog.objects.filter(status='published')
-            .order_by('-publish_date', '-updated_at')[:limit]
-        )
+        for post in posts:
+            if not latest_post and '[latest]' in post.title:
+                post.title = post.title.replace('[latest]','').strip()
+                post.save()
+
+            if latest_post and '[latest]' not in post.title and post in latest_post:
+                post.title = f'{post.title} [latest] '
+                post.save()
+        return latest_post
 
     @staticmethod
     def get_published_post(slug):
@@ -288,6 +300,25 @@ class BlogService:
         return BlogService.with_engagement_counts(
             Blog.objects.filter(author=user)
         ).order_by('-created_at')
+
+    @staticmethod
+    def get_author_reaction_totals(author):
+        from .models import Blog
+
+        totals = Blog.objects.filter(author=author, status='published').aggregate(
+            likes_total=Count(
+                'reactions',
+                filter=Q(reactions__reaction='like'),
+            ),
+            dislikes_total=Count(
+                'reactions',
+                filter=Q(reactions__reaction='dislike'),
+            ),
+        )
+        return {
+            'likes_total': totals['likes_total'] or 0,
+            'dislikes_total': totals['dislikes_total'] or 0,
+        }
 
     @staticmethod
     def get_author_profile(author, search_query='', page_number=1, page_size=6):
@@ -315,35 +346,22 @@ class BlogService:
 
         page_obj = Paginator(posts, page_size).get_page(page_number)
 
-        reaction_stats = (
-            Blog.objects.filter(author=author, status='published')
-            .annotate(
-                like_count=Count('reactions', filter=Q(reactions__reaction='like')),
-                dislike_count=Count(
-                    'reactions',
-                    filter=Q(reactions__reaction='dislike'),
-                ),
-            )
-            .aggregate(
-                likes_total=Sum('like_count'),
-                dislikes_total=Sum('dislike_count'),
-            )
-        )
+        reaction_stats = BlogService.get_author_reaction_totals(author)
 
         logger.debug(
             'Author profile summary built for author=%s with %s posts, likes=%s, dislikes=%s',
             author.username,
             posts.count(),
-            reaction_stats['likes_total'] or 0,
-            reaction_stats['dislikes_total'] or 0,
+            reaction_stats['likes_total'],
+            reaction_stats['dislikes_total'],
         )
         return {
             'author': author,
             'profile': profile,
             'posts': page_obj,
             'search_query': search_query,
-            'likes_total': reaction_stats['likes_total'] or 0,
-            'dislikes_total': reaction_stats['dislikes_total'] or 0,
+            'likes_total': reaction_stats['likes_total'],
+            'dislikes_total': reaction_stats['dislikes_total'],
         }
 
     @staticmethod

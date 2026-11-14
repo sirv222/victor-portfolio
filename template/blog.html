@@ -44,7 +44,7 @@
         <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
         {% if user.is_authenticated %}
           <a href="{% url 'writer_dashboard' %}" class="btn btn-outline small-btn">Dashboard</a>
-          <form method="post" action="{% url 'logout' %}">
+          <form method="post" action="{% url 'logout' %}" class="logout-form">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary small-btn">Logout</button>
           </form>
