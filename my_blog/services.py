@@ -4,6 +4,7 @@ import time
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core import mail
 from django.core.cache import cache
@@ -47,6 +48,8 @@ class AuthSecurityService:
         ip_value, ip_window = AuthSecurityService.parse_rate_limit(ip_limit)
         session_value, session_window = AuthSecurityService.parse_rate_limit(session_limit)
         client_ip = request.META.get('REMOTE_ADDR', 'unknown')
+        if not request.session.session_key:
+            request.session.create()
         session_key = f'auth:{action}:session:{request.session.session_key or "anonymous"}'
         ip_key = f'auth:{action}:ip:{client_ip}'
         now = int(time.time())
@@ -92,10 +95,11 @@ class AuthSecurityService:
             return {'ok': False, 'message': 'Please complete the CAPTCHA verification.'}
 
         try:
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            AuthSecurityService.send_verification_email(user, request=request)
+            with transaction.atomic():
+                user = form.save()
+                if not AuthSecurityService.send_verification_email(user, request=request):
+                    logger.error('Registration failed because the verification email could not be sent.')
+                    raise RuntimeError('Verification email delivery failed.')
             logger.info('User registration accepted; verification email queued.')
             return {'ok': True, 'user': user}
         except Exception:
@@ -187,6 +191,22 @@ class AuthSecurityService:
 
 class BlogService:
     @staticmethod
+    def with_engagement_counts(queryset):
+        return queryset.annotate(
+            likes_total=Count(
+                'reactions',
+                filter=Q(reactions__reaction='like'),
+                distinct=True,
+            ),
+            dislikes_total=Count(
+                'reactions',
+                filter=Q(reactions__reaction='dislike'),
+                distinct=True,
+            ),
+            comments_total=Count('comments', distinct=True),
+        )
+
+    @staticmethod
     def sanitize_search_query(raw_query):
         """Normalize and validate a user-provided search string."""
         if raw_query is None:
@@ -221,13 +241,13 @@ class BlogService:
         from .models import Blog
 
         safe_query = BlogService.sanitize_search_query(search_query)
-        queryset = Blog.objects.select_related(
-            'author'
-        ).prefetch_related('comments', 'reactions').filter(status='published')
+        queryset = BlogService.with_engagement_counts(
+            Blog.objects.select_related('author').filter(status='published')
+        )
 
         if not safe_query:
             logger.debug('Loading public blog feed without any search filter.')
-            return queryset.order_by('?')
+            return queryset.order_by('-publish_date', '-created_at')
 
         logger.info('Filtering public blog feed by query=%r', safe_query)
         return queryset.filter(
@@ -238,15 +258,23 @@ class BlogService:
         ).distinct()
 
     @staticmethod
+    def get_latest_posts(limit=4):
+        from .models import Blog
+
+        return (
+            Blog.objects.filter(status='published')
+            .order_by('-publish_date', '-updated_at')[:limit]
+        )
+
+    @staticmethod
     def get_published_post(slug):
         from .models import Blog
         try:
-            return (
+            return BlogService.with_engagement_counts(
                 Blog.objects.filter(status='published')
                 .select_related('author')
-                .prefetch_related('comments__user', 'reactions')
-                .get(slug=slug)
-            )
+                .prefetch_related('comments__user')
+            ).get(slug=slug)
         except Blog.DoesNotExist:
             logger.warning(
                 'Attempted access to unpublished or unknown blog post with slug=%s',
@@ -257,7 +285,9 @@ class BlogService:
     @staticmethod
     def get_user_posts(user):
         from .models import Blog
-        return Blog.objects.filter(author=user).order_by('-created_at')
+        return BlogService.with_engagement_counts(
+            Blog.objects.filter(author=user)
+        ).order_by('-created_at')
 
     @staticmethod
     def get_author_profile(author, search_query='', page_number=1, page_size=6):
@@ -265,8 +295,8 @@ class BlogService:
         from .models import Blog, WriterProfile
 
         profile, _ = WriterProfile.objects.get_or_create(user=author)
-        posts = Blog.objects.filter(author=author, status='published').select_related(
-            'author'
+        posts = BlogService.with_engagement_counts(
+            Blog.objects.filter(author=author, status='published').select_related('author')
         ).order_by('-publish_date', '-created_at')
 
         if search_query:
@@ -545,6 +575,7 @@ class BlogService:
                 logger.warning('Password reset confirmation rejected: invalid or expired reset token.')
                 return False
 
+            validate_password(new_password, user=user)
             user.set_password(new_password)
             user.save(update_fields=['password'])
             logger.info('Password reset completed successfully for an author account.')

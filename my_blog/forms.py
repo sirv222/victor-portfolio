@@ -1,3 +1,4 @@
+import logging
 import re
 
 from django import forms
@@ -15,7 +16,28 @@ from django.utils.html import strip_tags
 from .models import Blog, WriterProfile
 
 
-class BaseSecurityForm(forms.Form):
+logger = logging.getLogger(__name__)
+
+
+class RecaptchaResponseWidget(forms.HiddenInput):
+    def value_from_datadict(self, data, files, name):
+        return data.get('g-recaptcha-response') or super().value_from_datadict(data, files, name)
+
+
+class RequiredFieldLoggingMixin:
+    def full_clean(self):
+        super().full_clean()
+
+        for field_name, errors in self.errors.as_data().items():
+            if any(error.code == 'required' for error in errors):
+                logger.warning(
+                    'Required form field missing. form=%s field=%s',
+                    self.__class__.__name__,
+                    field_name,
+                )
+
+
+class BaseSecurityForm(RequiredFieldLoggingMixin, forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         for field_name, value in cleaned_data.items():
@@ -24,10 +46,13 @@ class BaseSecurityForm(forms.Form):
         return cleaned_data
 
 
-class WriterLoginForm(AuthenticationForm):
+class WriterLoginForm(RequiredFieldLoggingMixin, AuthenticationForm):
     # Hidden fields are used for bot detection and server-side CAPTCHA validation.
     website = forms.CharField(required=False, widget=forms.HiddenInput())
-    captcha_token = forms.CharField(required=False, widget=forms.HiddenInput())
+    captcha_token = forms.CharField(
+        error_messages={'required': 'Please complete the CAPTCHA verification.'},
+        widget=RecaptchaResponseWidget(),
+    )
     username = forms.CharField(
         max_length=150,
         strip=True,
@@ -50,9 +75,6 @@ class WriterLoginForm(AuthenticationForm):
             self.add_error('password', 'Password is required.')
         if cleaned_data.get('website'):
             raise forms.ValidationError('Invalid request.')
-        if not cleaned_data.get('captcha_token'):
-            self.add_error('captcha_token', 'Please complete the CAPTCHA verification.')
-
         return cleaned_data
 
     def clean_username(self):
@@ -72,10 +94,13 @@ class WriterLoginForm(AuthenticationForm):
         return password.strip()
 
 
-class WriterRegistrationForm(UserCreationForm):
+class WriterRegistrationForm(RequiredFieldLoggingMixin, UserCreationForm):
     # Registration must reject bot traffic and require verification before the account becomes active.
     website = forms.CharField(required=False, widget=forms.HiddenInput())
-    captcha_token = forms.CharField(required=False, widget=forms.HiddenInput())
+    captcha_token = forms.CharField(
+        error_messages={'required': 'Please complete the CAPTCHA verification.'},
+        widget=RecaptchaResponseWidget(),
+    )
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'placeholder': 'Email address'}))
 
     class Meta(UserCreationForm.Meta):
@@ -114,14 +139,12 @@ class WriterRegistrationForm(UserCreationForm):
         password2 = cleaned_data.get('password2')
         if cleaned_data.get('website'):
             raise forms.ValidationError('Invalid request.')
-        if not cleaned_data.get('captcha_token'):
-            self.add_error('captcha_token', 'Please complete the CAPTCHA verification.')
         if password1 and password2 and password1 != password2:
             self.add_error('password2', 'Passwords do not match.')
         return cleaned_data
 
 
-class BlogPostForm(forms.ModelForm):
+class BlogPostForm(RequiredFieldLoggingMixin, forms.ModelForm):
     class Meta:
         model = Blog
         fields = ('title', 'excerpt', 'content', 'cover_image', 'status')
@@ -163,7 +186,7 @@ class BlogPostForm(forms.ModelForm):
         return status
 
 
-class WriterProfileForm(forms.ModelForm):
+class WriterProfileForm(RequiredFieldLoggingMixin, forms.ModelForm):
     class Meta:
         model = WriterProfile
         fields = ('bio', 'avatar')
@@ -179,7 +202,7 @@ class WriterProfileForm(forms.ModelForm):
         return cleaned
 
 
-class WriterPasswordResetForm(PasswordResetForm):
+class WriterPasswordResetForm(RequiredFieldLoggingMixin, PasswordResetForm):
     def clean_email(self):
         email = (self.cleaned_data.get('email') or '').strip().lower()
         if not email:
@@ -189,7 +212,7 @@ class WriterPasswordResetForm(PasswordResetForm):
         return email
 
 
-class WriterSetPasswordForm(SetPasswordForm):
+class WriterSetPasswordForm(RequiredFieldLoggingMixin, SetPasswordForm):
     def clean_new_password2(self):
         password2 = self.cleaned_data.get('new_password2')
         if password2:
@@ -210,7 +233,7 @@ class WriterSetPasswordForm(SetPasswordForm):
         return cleaned_data
 
 
-class AuthorPasswordChangeForm(forms.Form):
+class AuthorPasswordChangeForm(RequiredFieldLoggingMixin, forms.Form):
     old_password = forms.CharField(
         label='Current password',
         strip=False,

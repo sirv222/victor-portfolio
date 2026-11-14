@@ -34,7 +34,7 @@ def blog(request):
     try:
         search_query = request.GET.get('q', '')
         posts = BlogService.get_public_posts(search_query)
-        latest_post = Blog.objects.filter(status='published').order_by('-publish_date')[:4]
+        latest_post = BlogService.get_latest_posts()
         paginator = Paginator(posts, 9)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -43,11 +43,12 @@ def blog(request):
         context['posts'] = page_obj
         context['search_query'] = search_query
         context['latest_post'] = latest_post
+
         logger.info(
-            'Public blog feed loaded for user=%s with query=%r page=%s',
-            getattr(request.user, 'id', None),
-            search_query,
-            page_number,
+        'Public blog feed loaded for user=%s with query=%r page=%s',
+        getattr(request.user, 'id', None),
+        search_query,
+        page_number,
         )
         return render(request, 'blog.html', context,)
     except ValidationError as exc:
@@ -184,12 +185,13 @@ def account_settings(request):
     context['profile'] = profile
 
     if request.method == 'POST':
-        profile_form = WriterProfileForm(request.POST, request.FILES, instance=profile)
+        profile_data = request.POST.copy()
+        if 'bio' not in profile_data:
+            profile_data['bio'] = profile.bio
+        profile_form = WriterProfileForm(profile_data, request.FILES, instance=profile)
         password_form = AuthorPasswordChangeForm(request.user, request.POST)
 
-        profile_submitted = any(
-            field in request.POST for field in ['bio', 'avatar']
-        )
+        profile_submitted = 'bio' in request.POST or 'avatar' in request.FILES
         password_submitted = any(
             field in request.POST
             for field in ['old_password', 'new_password1', 'new_password2']
@@ -377,7 +379,7 @@ def writer_login(request):
         return redirect('writer_dashboard')
 
     if request.method == 'POST':
-        form = WriterLoginForm(request.POST)
+        form = WriterLoginForm(request=request, data=request.POST)
         if form.is_valid():
             result = AuthSecurityService.authenticate_user(
                 request,
@@ -504,6 +506,7 @@ def verify_account_email(request, uidb64=None, token=None):
     return redirect('login')
 
 
+@require_POST
 @login_required
 def writer_logout(request):
     logout(request)

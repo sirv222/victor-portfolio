@@ -22,7 +22,10 @@
       <div class="nav-actions">
         <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
         <a href="{% url 'create_blog_post' %}" class="btn btn-primary small-btn">New Post</a>
-        <a href="{% url 'logout' %}" class="btn btn-outline small-btn">Logout</a>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline small-btn">Logout</button>
+        </form>
       </div>
     </nav>
   </header>

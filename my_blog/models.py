@@ -55,14 +55,20 @@ class Blog(models.Model):
 
     @property
     def likes_count(self):
+        if hasattr(self, 'likes_total'):
+            return self.likes_total
         return self.reactions.filter(reaction='like').count()
 
     @property
     def dislikes_count(self):
+        if hasattr(self, 'dislikes_total'):
+            return self.dislikes_total
         return self.reactions.filter(reaction='dislike').count()
 
     @property
     def comments_count(self):
+        if hasattr(self, 'comments_total'):
+            return self.comments_total
         return self.comments.count()
 
     def save(self, *args, **kwargs):
@@ -133,4 +139,4 @@ class BlogComment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Comment on {self.post.title}' 
+        return f'Comment on {self.post.title}'
