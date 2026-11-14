@@ -34,6 +34,7 @@ def blog(request):
     try:
         search_query = request.GET.get('q', '')
         posts = BlogService.get_public_posts(search_query)
+        latest_post = Blog.objects.filter(status='published').order_by('-publish_date')[:4]
         paginator = Paginator(posts, 9)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -41,13 +42,14 @@ def blog(request):
         context = portfolio_data(request)
         context['posts'] = page_obj
         context['search_query'] = search_query
+        context['latest_post'] = latest_post
         logger.info(
             'Public blog feed loaded for user=%s with query=%r page=%s',
             getattr(request.user, 'id', None),
             search_query,
             page_number,
         )
-        return render(request, 'blog.html', context)
+        return render(request, 'blog.html', context,)
     except ValidationError as exc:
         logger.warning(
             'Invalid blog search query from user=%s: %s',

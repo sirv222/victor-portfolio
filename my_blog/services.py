@@ -221,13 +221,13 @@ class BlogService:
         from .models import Blog
 
         safe_query = BlogService.sanitize_search_query(search_query)
-        queryset = Blog.objects.filter(status='published').select_related(
+        queryset = Blog.objects.select_related(
             'author'
-        ).prefetch_related('comments', 'reactions')
+        ).prefetch_related('comments', 'reactions').filter(status='published')
 
         if not safe_query:
             logger.debug('Loading public blog feed without any search filter.')
-            return queryset
+            return queryset.order_by('?')
 
         logger.info('Filtering public blog feed by query=%r', safe_query)
         return queryset.filter(

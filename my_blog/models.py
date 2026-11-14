@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
+import random
+
 
 class WriterProfile(models.Model):
     user = models.OneToOneField(
@@ -35,7 +37,9 @@ class Blog(models.Model):
         on_delete=models.CASCADE,
         related_name='blog_posts',
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='draft'
+        )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     publish_date = models.DateTimeField(blank=True, null=True)
@@ -118,8 +122,13 @@ class BlogReaction(models.Model):
 
 
 class BlogComment(models.Model):
-    post = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='blog_comments')
+    post = models.ForeignKey(
+        Blog, on_delete=models.CASCADE, related_name='comments'
+        )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, 
+        null=True, blank=True, related_name='blog_comments'
+        )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

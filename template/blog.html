@@ -151,7 +151,7 @@
         <h3>Latest updates</h3>
         <p class="muted">Read practical articles, case studies, and technical notes.</p>
         <div class="stacked-links">
-          {% for post in posts|slice:':4' %}
+          {% for post in latest_post|slice:':4' %}
             <a href="{% url 'blog_post_detail' slug=post.slug %}">{{ post.title }}</a>
           {% empty %}
             <span class="muted">No articles available yet.</span>

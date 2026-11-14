@@ -180,29 +180,30 @@ WSGI_APPLICATION = 'my_portfolio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': get_env('DB_NAME', 'portfolio'),
-        'USER': get_env('DB_USER', 'postgres'),
-        'PASSWORD': get_env('DB_PASSWORD', ''),
-        'HOST': get_env('DB_HOST', 'localhost'),
-        'PORT': get_env('DB_PORT', '5432'),
-        'CONN_MAX_AGE': 60,
-    }
-}
-
-DATABASE_URL = get_env('DATABASE_URL')
-
-if DATABASE_URL:
+if DEBUG : 
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=not DEBUG,
-        )
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': get_env('DB_NAME', 'portfolio'),
+            'USER': get_env('DB_USER', 'postgres'),
+            'PASSWORD': get_env('DB_PASSWORD', '').strip(),
+            'HOST': get_env('DB_HOST', 'localhost'),
+            'PORT': get_env('DB_PORT', '8000'),
+            'CONN_MAX_AGE': 60,
+        }
     }
 
+else:
+    DATABASE_URL = get_env('DATABASE_URL')
+
+    if DATABASE_URL:
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                ssl_require=not DEBUG,
+            )
+        }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -266,26 +267,28 @@ EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER or 'webmaster@localhost'
 CONTACT_EMAIL = get_env('CONTACT_EMAIL', 'victoreruwa@gmail.com')
 
-REDIS_URL = get_env(
-    'REDIS_URL',
-    'redis://127.0.0.1:6379/1'
-)
+if DEBUG:
+    REDIS_URL = get_env(
+        'REDIS_URL',
+        'redis://127.0.0.1:6379/1'
+    )
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': get_env(
-            'REDIS_URL',
-            'redis://127.0.0.1:6379/1'
-        ),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SOCKET_CONNECT_TIMEOUT': 5,
-            'SOCKET_TIMEOUT': 5,
-        },
-        'TIMEOUT': 300,
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': get_env(
+                'REDIS_URL',
+                'redis://127.0.0.1:6379/1'
+            ),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+            },
+            'TIMEOUT': 300,
+        }
     }
-}
 
 RATELIMIT_USE_CACHE = 'default'
 
