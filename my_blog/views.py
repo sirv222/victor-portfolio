@@ -33,9 +33,10 @@ def blog(request):
     """Render the public blog listing with optional search filtering."""
     try:
         search_query = request.GET.get('q', '')
-        posts = BlogService.get_public_posts(search_query)
+        blog_posts = BlogService.get_public_posts(search_query)
+        posts = Blog.objects.select_related('author').filter(status='published')
         latest_post = BlogService.get_latest_posts(posts=posts)
-        paginator = Paginator(posts, 9)
+        paginator = Paginator(blog_posts, 9)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 

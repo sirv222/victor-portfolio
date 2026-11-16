@@ -24,8 +24,13 @@
     <nav class="nav-inner">
       <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
       <ul class="nav-links">
-        <li><a href="{% url 'blog' %}" class="active">Home</a></li>
-        <li><a href="{% url 'blog' %}?q=latest">Latest</a></li>
+        {% if request.GET.q == 'latest' %}
+          <li><a href="{% url 'blog' %}">Home</a></li>
+          <li><a href="{% url 'blog' %}?q=latest" class="active">Latest</a></li>
+        {% else %}
+          <li><a href="{% url 'blog' %}" class="active">Home</a></li>
+          <li><a href="{% url 'blog' %}?q=latest">Latest</a></li>
+        {% endif %}
         <li class="nav-dropdown">
           <button type="button" class="category-trigger">Categories</button>
           <div class="dropdown-menu">
@@ -43,7 +48,6 @@
       <div class="nav-actions">
         <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
         {% if user.is_authenticated %}
-          <a href="{% url 'writer_dashboard' %}" class="btn btn-outline small-btn">Dashboard</a>
           <form method="post" action="{% url 'logout' %}" class="logout-form">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary small-btn">Logout</button>
@@ -134,9 +138,7 @@
 
           {% for page_num in posts.paginator.page_range %}
             {% if page_num == posts.number %}
-              <span class="pagination-btn active">{{ page_num }}</span>
-            {% else %}
-              <a href="?page={{ page_num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}" class="pagination-btn">{{ page_num }}</a>
+              <span class="pagination-btn activ">{{ page_num }}</span>
             {% endif %}
           {% endfor %}
 

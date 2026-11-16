@@ -16,8 +16,20 @@
       <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
       <ul class="nav-links">
         <li><a href="{% url 'blog' %}">Home</a></li>
-        <li><a href="{% url 'writer_dashboard' %}">Dashboard</a></li>
-        <li><a href="{% url 'create_blog_post' %}">New Post</a></li>
+        <li><a href="{% url 'blog' %}?q=latest">Latest</a></li>
+        <li class="nav-dropdown">
+          <button type="button" class="category-trigger">Categories</button>
+          <div class="dropdown-menu">
+            <a href="{% url 'blog' %}">All</a>
+            <a href="{% url 'blog' %}?q=design">Design</a>
+            <a href="{% url 'blog' %}?q=development">Development</a>
+            <a href="{% url 'blog' %}?q=creative">Creative</a>
+            <a href="{% url 'blog' %}?q=insights">Insights</a>
+          </div>
+        </li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'writer_dashboard' %}" class="active">Dashboard</a></li>
+        {% endif %}
       </ul>
       <div class="nav-actions">
         <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
@@ -117,9 +129,7 @@
 
         {% for page_num in posts.paginator.page_range %}
           {% if page_num == posts.number %}
-            <span class="pagination-btn active">{{ page_num }}</span>
-          {% else %}
-            <a href="?page={{ page_num }}" class="pagination-btn">{{ page_num }}</a>
+            <span class="pagination-btn activ">{{ page_num }}</span>
           {% endif %}
         {% endfor %}
 
