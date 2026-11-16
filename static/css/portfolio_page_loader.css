@@ -10,7 +10,7 @@
     justify-content: center;
 
     /* Keep the actual webpage visible underneath */
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(39, 38, 38, 0.78);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
 
@@ -50,7 +50,7 @@
 }
 
 .brand-name {
-    color: #171717;
+    color: #b0afaf;
 }
 
 .brand-blue {
@@ -99,7 +99,7 @@
 .loader-message {
     font-size: 14px;
     font-weight: 500;
-    color: #555;
+    color: #b0afaf;
     letter-spacing: 0.3px;
 }
 
@@ -144,7 +144,7 @@
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 2px;
-    color: #777;
+    color: #b0afaf;
 }
 
 /* ANIMATIONS */
