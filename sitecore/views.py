@@ -14,19 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 def homepage(request):
-    return render(request, 'index.html')
+    return render(request, 'portfolio/index.html')
 
 
 def about(request):
-    return render(request, 'about.html')
+    return render(request, 'portfolio/about.html')
 
 
 def projects(request):
-    return render(request, 'projects.html')
+    return render(request, 'portfolio/projects.html')
 
 
 def skills(request):
-    return render(request, 'skills.html')
+    return render(request, 'portfolio/skills.html')
 
 
 @ratelimit(key='ip', rate='10/h', method='POST', block=False)
@@ -36,7 +36,7 @@ def contact(request):
     if request.method != 'POST':
         return render(
             request,
-            'contact.html',
+            'portfolio/contact.html',
             {'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY, 'form': form},
         )
 

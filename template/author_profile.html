@@ -149,6 +149,15 @@
     {% endif %}
   </main>
 
+  <footer>
+    <div class="container footer-inner">
+      <a href="{% url 'blog' %}" class="logo">Ink<span>&amp; Insight</span></a>
+      <p class="footer-copy">© <span class="current-year"></span> Ink &amp; Insight. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
   <script src="{% static 'blog.js' %}"></script>
 </body>
 </html>
