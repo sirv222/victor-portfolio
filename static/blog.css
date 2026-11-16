@@ -182,6 +182,23 @@ html[data-theme='light'] .navbar {
   font-size: 1.1rem;
 }
 
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.nav-toggle span {
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+  transition: all 0.3s ease;
+}
+
 .small-btn {
   display: inline-flex;
   align-items: center;
@@ -944,7 +961,30 @@ html[data-theme='light'] .navbar {
 
 @media (max-width: 760px) {
   .nav-links {
-    display: none;
+    position: fixed;
+    top: 76px;
+    left: 0;
+    right: 0;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    padding: 20px;
+    transform: translateY(-150%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    gap: 6px;
+  }
+
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+  }
+  .nav-toggle {
+    display: flex;
   }
 
   .blog-list,

@@ -17,6 +17,30 @@
     });
   }
 
+   /* ---------------- Mobile Nav ---------------- */
+  function initNav() {
+    const toggle = document.querySelector('.nav-toggle');
+    const links = document.querySelector('.nav-links');
+    if (!toggle || !links) return;
+
+    toggle.addEventListener('click', () => {
+      links.classList.toggle('open');
+    });
+
+    links.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('click', () => links.classList.remove('open'));
+    });
+
+    // Highlight active page
+    const current = window.location.pathname.split('/').pop() || 'index.html';
+    links.querySelectorAll('a').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (href === current || (current === '' && href === 'index.html')) {
+        a.classList.add('active');
+      }
+    });
+  }
+
   function initReveal() {
     const items = document.querySelectorAll('.reveal');
     if (!items.length) return;
@@ -150,6 +174,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initReveal();
+    initNav();
     initBackToTop();
     initYear();
     initDjangoMessages();
