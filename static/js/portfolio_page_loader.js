@@ -1,19 +1,22 @@
 
-document.addEventListener("DOMContentLoaded", () => {
+(() => {
     const loader = document.getElementById("page-loader");
 
     if (!loader) return;
 
-    const hideLoader = () => {
+    let isHidden = false;
+
+    function hideLoader() {
+        if (isHidden) return;
+
+        isHidden = true;
         loader.classList.add("hidden");
 
-        // Remove from the DOM after fade-out
         setTimeout(() => {
             loader.remove();
-        }, 700);
-    };
+        }, 750);
+    }
 
-    // Handle normal page loading
     if (document.readyState === "complete") {
         hideLoader();
     } else {
@@ -22,10 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle browser back/forward navigation
     window.addEventListener("pageshow", (event) => {
         if (event.persisted) {
             hideLoader();
         }
     });
-});
+
+})();

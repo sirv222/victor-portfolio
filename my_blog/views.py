@@ -51,7 +51,7 @@ def blog(request):
         search_query,
         page_number,
         )
-        return render(request, 'blog.html', context,)
+        return render(request, 'blog/blog.html', context,)
     except ValidationError as exc:
         logger.warning(
             'Invalid blog search query from user=%s: %s',
@@ -62,14 +62,14 @@ def blog(request):
         context = portfolio_data(request)
         context['posts'] = Paginator(BlogService.get_public_posts(''), 9).get_page(1)
         context['search_query'] = ''
-        return render(request, 'blog.html', context)
+        return render(request, 'blog/blog.html', context)
     except Exception:
         logger.exception('Unexpected error while loading the public blog feed.')
         messages.error(request, 'The blog feed could not be loaded right now.')
         context = portfolio_data(request)
         context['posts'] = Paginator(BlogService.get_public_posts(''), 9).get_page(1)
         context['search_query'] = ''
-        return render(request, 'blog.html', context)
+        return render(request, 'blog/blog.html', context)
 
 
 def blog_post_detail(request, slug):
@@ -78,7 +78,7 @@ def blog_post_detail(request, slug):
         post = BlogService.get_published_post(slug)
     except Blog.DoesNotExist:
         logger.warning('Blog detail request for unknown or unpublished slug: %s', slug)
-        return render(request, '404.html', status=404)
+        return render(request, 'include/404.html', status=404)
     except Exception:
         logger.exception('Unexpected error while fetching blog detail for slug=%s', slug)
         messages.error(request, 'The blog post could not be loaded.')
@@ -101,7 +101,7 @@ def blog_post_detail(request, slug):
             slug,
         )
 
-    return render(request, 'blog_detail.html', context)
+    return render(request, 'blog/blog_detail.html', context)
 
 
 def author_profile(request, username):
@@ -125,7 +125,7 @@ def author_profile(request, username):
         search_query,
         page_number,
     )
-    return render(request, 'author_profile.html', context)
+    return render(request, 'blog/author_profile.html', context)
 
 
 @login_required
@@ -141,7 +141,7 @@ def writer_dashboard(request):
         context['posts_total'] = posts.count()
         context['published_posts_total'] = posts.filter(status='published').count()
         context.update(reaction_totals)
-        return render(request, 'writer_dashboard.html', context)
+        return render(request, 'blog/writer_dashboard.html', context)
     except Exception:
         logger.exception('User dashboard error for user=%s', getattr(request.user, 'id', None))
         messages.error(request, 'Your dashboard is temporarily unavailable.')
@@ -177,10 +177,10 @@ def create_blog_post(request):
             )
             messages.error(request, 'Please fix the highlighted fields and try again.')
         context['form'] = form
-        return render(request, 'create_blog_post.html', context)
+        return render(request, 'blog/create_blog_post.html', context)
 
     context['form'] = BlogPostForm()
-    return render(request, 'create_blog_post.html', context)
+    return render(request, 'blog/create_blog_post.html', context)
 
 
 @login_required
@@ -245,11 +245,11 @@ def account_settings(request):
 
         context['profile_form'] = profile_form
         context['password_form'] = password_form
-        return render(request, 'account_settings.html', context)
+        return render(request, 'blog/account_settings.html', context)
 
     context['profile_form'] = WriterProfileForm(instance=profile)
     context['password_form'] = AuthorPasswordChangeForm(request.user)
-    return render(request, 'account_settings.html', context)
+    return render(request, 'blog/account_settings.html', context)
 
 
 @require_POST
@@ -407,7 +407,7 @@ def writer_login(request):
         form = WriterLoginForm()
 
     context['form'] = form
-    return render(request, 'login.html', context)
+    return render(request, 'blog/login.html', context)
 
 
 @ratelimit(key='ip', rate='5/m', block=True)
@@ -426,7 +426,7 @@ def password_reset_request(request):
                     request, 
                     'We could not process your request right now. Please try again later.'
                     )
-                return render(request, 'password_reset.html', {**context, 'form': form})
+                return render(request, 'blog/password_reset.html', {**context, 'form': form})
 
             logger.info('Password reset request received and processed.')
             return redirect('password_reset_done')
@@ -434,13 +434,13 @@ def password_reset_request(request):
         logger.warning('Password reset request rejected due to invalid form data.')
 
     context['form'] = form
-    return render(request, 'password_reset.html', context)
+    return render(request, 'blog/password_reset.html', context)
 
 
 @ratelimit(key='ip', rate='10/m', block=True)
 def password_reset_done_view(request):
     context = portfolio_data(request)
-    return render(request, 'password_reset_done.html', context)
+    return render(request, 'blog/password_reset_done.html', context)
 
 
 @ratelimit(key='ip', rate='10/m', block=True)
@@ -469,14 +469,14 @@ def password_reset_confirm_view(request, uidb64=None, token=None):
                     )
                 messages.error(request, exc.messages[0])
                 form.add_error(None, exc.messages[0])
-                return render(request, 'password_reset_confirm.html', {**context, 'form': form})
+                return render(request, 'blog/password_reset_confirm.html', {**context, 'form': form})
             
             except Exception:
                 logger.exception('Password reset confirmation processing failed.')
                 messages.error(
                     request, 'We could not update your password right now. Please try again later.'
                     )
-                return render(request, 'password_reset_confirm.html', {**context, 'form': form})
+                return render(request, 'blog/password_reset_confirm.html', {**context, 'form': form})
 
             if success:
                 return redirect('password_reset_complete')
@@ -488,13 +488,13 @@ def password_reset_confirm_view(request, uidb64=None, token=None):
             return redirect('password_reset')
 
     context['form'] = form
-    return render(request, 'password_reset_confirm.html', context)
+    return render(request, 'blog/password_reset_confirm.html', context)
 
 
 @ratelimit(key='ip', rate='10/m', block=True)
 def password_reset_complete_view(request):
     context = portfolio_data(request)
-    return render(request, 'password_reset_complete.html', context)
+    return render(request, 'blog/password_reset_complete.html', context)
 
 
 @ratelimit(key='ip', rate='10/m', block=True)
@@ -547,4 +547,4 @@ def register_writer(request):
         form = WriterRegistrationForm()
 
     context['form'] = form
-    return render(request, 'register_writer.html', context)
+    return render(request, 'blog/register_writer.html', context)

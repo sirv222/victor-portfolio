@@ -10,8 +10,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'blog.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/blog_page_loader.css' %}" />
 </head>
 <body>
+
+  {% include 'include/blog_page_loader.html' %}
+
   {% if messages %}
   <div id="django-messages" hidden>
     {% for message in messages %}
@@ -127,5 +131,6 @@
 
   <button class="back-to-top" aria-label="Back to top">↑</button>
   <script src="{% static 'blog.js' %}"></script>
+  <script src="{% static 'js/blog_page_loader.js' %}"></script>
 </body>
 </html>
