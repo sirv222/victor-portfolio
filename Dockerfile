@@ -14,6 +14,7 @@ WORKDIR /build
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     build-essential \
+    libc6-dev \
     libpq-dev \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
