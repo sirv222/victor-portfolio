@@ -65,4 +65,4 @@ HEALTHCHECK --interval=30s --timeout=10s \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/')" || exit 1
 
 # Collect static files and start Gunicorn
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && gunicorn my_portfolio.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 120"]
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && exec gunicorn my_portfolio.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --threads 4 --timeout 120"]
