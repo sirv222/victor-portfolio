@@ -13,7 +13,9 @@ WORKDIR /build
 # Dependencies needed to compile psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    build-essential \
     libpq-dev \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create isolated Python environment
