@@ -1,0 +1,26 @@
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: my_portfolio_web
+
+    command: python manage.py runserver 0.0.0.0:9000
+
+    ports:
+      - "9000:9000"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_HOST: host.docker.internal
+      DB_PORT: "5432"
+      REDIS_URL: redis://host.docker.internal:6379/1
+
+    volumes:
+      - .:/app
+
+    restart: unless-stopped
