@@ -13,6 +13,7 @@ WORKDIR /build
 # Dependencies needed to compile psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    libc6-dev \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
