@@ -99,6 +99,8 @@ INSTALLED_APPS = [
 
     'cloudinary_storage',
     'cloudinary',
+    'anymail',
+
     'sitecore',
     'my_blog',
 ]
@@ -270,6 +272,10 @@ EMAIL_HOST_USER = get_env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER or 'webmaster@localhost'
 CONTACT_EMAIL = get_env('CONTACT_EMAIL', 'victoreruwa@gmail.com')
+
+ANYMAIL = {
+    'RESEND_API_KEY': get_env('RESEND_API_KEY'),
+}
 
 if DEBUG:
     REDIS_URL = get_env(

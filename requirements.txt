@@ -22,3 +22,4 @@ sqlparse>=0.6.0
 tzdata>=2026.5
 urllib3>=1.26.20
 whitenoise>=6.12.0
+django-anymail[resend]>=10.0.0
