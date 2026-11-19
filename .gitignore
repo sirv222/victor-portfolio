@@ -6,7 +6,6 @@
 __pycache__/
 *.py[cod]
 venv/
-portfolio/
 
 # Django
 db.sqlite3
