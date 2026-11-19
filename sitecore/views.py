@@ -55,7 +55,7 @@ def contact(request):
         )
         return render(
             request,
-            'contact.html',
+            'portfolio/contact.html',
             {'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY, 'form': form},
         )
 
@@ -64,7 +64,7 @@ def contact(request):
         messages.error(request, 'Please correct the highlighted form fields and try again.')
         return render(
             request,
-            'contact.html',
+            'portfolio/contact.html',
             {'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY, 'form': form},
         )
 
@@ -76,7 +76,7 @@ def contact(request):
         )
         return render(
             request,
-            'contact.html',
+            'portfolio/contact.html',
             {'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY, 'form': form},
         )
 

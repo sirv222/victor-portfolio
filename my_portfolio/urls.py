@@ -24,7 +24,7 @@ if settings.DEBUG:
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('myportfolio/', include('sitecore.urls')),
+    path('', include('sitecore.urls')),
     path('my_blog/', include('my_blog.urls')),
 ]
 
