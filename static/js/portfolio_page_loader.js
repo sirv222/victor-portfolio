@@ -3,20 +3,15 @@
 
     if (!loader) return;
 
-    let isHidden = false;
-
     function hideLoader() {
-        if (isHidden) return;
-
-        isHidden = true;
         loader.classList.add("hidden");
-
-        setTimeout(() => {
-            loader.remove();
-        }, 750);
     }
 
-    // Hide loader after the page finishes loading
+    function showLoader() {
+        loader.classList.remove("hidden");
+    }
+
+    // Hide loader after initial page load
     if (document.readyState === "complete") {
         hideLoader();
     } else {
@@ -32,38 +27,26 @@
         }
     });
 
-    // Show loader immediately before navigating to another page
+    // Show loader before navigating to another page
     document.addEventListener("click", (event) => {
         const link = event.target.closest("a");
 
         if (!link) return;
 
+        // Ignore contact form
+        if (event.target.closest("#contact-form")) return;
+
         // Ignore external links
         if (link.origin !== window.location.origin) return;
 
-        // Ignore links opening in another tab
+        // Ignore email and telephone links
+        if (["mailto:", "tel:"].includes(link.protocol)) return;
+
+        // Ignore new tabs
         if (link.target === "_blank") return;
 
         // Ignore downloads
         if (link.hasAttribute("download")) return;
-
-        // Ignore email links
-        if (link.protocol === "mailto:") return;
-
-        // Ignore telephone links
-        if (link.protocol === "tel:") return;
-
-        // Ignore clicks inside the contact form
-        if (event.target.closest("#contact-form")) return;
-
-        // Ignore links to the current page, including query strings and fragments
-        const currentURL = new URL(window.location.href);
-        const targetURL = new URL(link.href);
-
-        if (
-            currentURL.origin === targetURL.origin &&
-            currentURL.pathname === targetURL.pathname
-        ) return;
 
         // Ignore modified clicks
         if (
@@ -73,12 +56,14 @@
             event.metaKey
         ) return;
 
-        // Ignore same-page navigation
-        if (link.href === window.location.href) return;
+        // Ignore links to the same page
+        const currentURL = new URL(window.location.href);
+        const targetURL = new URL(link.href);
 
-        // Show loader before navigation
-        isHidden = false;
-        loader.classList.remove("hidden");
+        if (currentURL.pathname === targetURL.pathname) return;
+
+        // Show loader
+        showLoader();
     });
 
 })();
