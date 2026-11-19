@@ -266,7 +266,7 @@ class BlogService:
             Q(publish_date__gte=timeframe)|Q(updated_at__gte=timeframe)
             )
         latest_6_post =posts.filter(status='published').order_by('publish_date', 'created_at')[:limit]
-        latest_post = ( post_in_24h or latest_6_post).distinct()
+        latest_post = post_in_24h.union(latest_6_post)
 
         for post in posts:
             if not latest_post and '[latest]' in post.title:
